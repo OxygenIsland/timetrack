@@ -52,7 +52,7 @@ timetrack/
 | 子项目 | 技术栈 | 说明 |
 |--------|--------|------|
 | [`apps/frontend`](./apps/frontend/README.md) | Electron 32 + Vite 5 + React 18 + TS 5 + Ant Design 5 | 桌面应用前端，含主进程 / 预加载 / 渲染层 |
-| [`apps/backend`](./apps/backend/README.md) | Python 3.11 + FastAPI + SQLAlchemy 2 + SQLite | REST API 服务，依赖由 `uv` 管理 |
+| [`apps/backend`](./apps/backend/README.md) | Python 3.11 + FastAPI + SQLAlchemy 2 + SQLite + Loguru | REST API 服务，依赖由 `uv` 管理 |
 
 ## 🚀 快速开始
 
@@ -151,6 +151,7 @@ uv run black app scripts        # 代码格式化
 | 前端架构 | ✅ 完成 | 模块注册中心、UI / 业务分离 |
 | 前端核心模块 | ✅ 完成 | Dashboard / Records / WorkHour / Report / System |
 | 后端骨架 | ✅ 完成 | FastAPI + SQLAlchemy + SQLite |
+| 后端 - TraceId 链路 | ✅ 完成 | ContextVar + 中间件 + 日志 patcher（每条日志自动带 trace_id） |
 | 后端 - 健康检查 | ✅ 完成 | `/api/v1/health` |
 | 后端 - 人员事件接口 | ✅ 完成 | `/api/v1/personnel/events` |
 | 视频流 | 🟡 待接入 | MediaMTX + WHEP |
@@ -163,7 +164,7 @@ uv run black app scripts        # 代码格式化
 
 **前端**：Electron 32 + Vite 5 + React 18 + TypeScript 5 + Ant Design 5 + Zustand + TanStack Query + React Router 6
 
-**后端**：Python 3.11 + FastAPI + SQLAlchemy 2.0 + Pydantic v2 + SQLite（uv 管理依赖）
+**后端**：Python 3.11 + FastAPI + SQLAlchemy 2.0 + Pydantic v2 + SQLite + Loguru（uv 管理依赖）
 
 **算法（待对接）**：YOLOv8 + ByteTrack + OSNet ReID
 

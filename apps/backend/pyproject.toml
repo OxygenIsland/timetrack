@@ -8,13 +8,14 @@ authors = [{ name = "TimeTrack Team" }]
 requires-python = ">=3.11,<3.15"
 
 # 一期最简依赖：FastAPI + SQLAlchemy 2.0 + SQLite
-# 后续按需加：Pydantic Settings / Alembic / Loguru / httpx / 等等
+# 后续按需加：Pydantic Settings / Alembic / httpx / 等等
 dependencies = [
     "fastapi>=0.115.0,<0.120.0",           # Web 框架
     "uvicorn[standard]>=0.32.0,<0.36.0",   # ASGI 服务器
     "pydantic>=2.9.0,<3.0.0",              # 数据校验
     "pydantic-settings>=2.6.0,<3.0.0",     # 配置管理
     "sqlalchemy>=2.0.36,<2.1.0",           # ORM
+    "loguru>=0.7.2,<0.8.0",                # 日志（统一接管 stdlib）
     "python-multipart>=0.0.12",            # 文件上传支持（后续报表导出用）
     "python-dateutil>=2.9.0",              # 日期解析
 ]
