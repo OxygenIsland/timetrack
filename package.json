@@ -1,0 +1,31 @@
+{
+  "name": "timetrack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TimeTrack - 智能摄像头工时统计系统",
+  "author": "TimeTrack Team",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @timetrack/frontend dev",
+    "dev:backend": "pnpm --filter @timetrack/backend dev",
+    "dev:all": "concurrently -n BACKEND,FRONTEND -c green,blue \"pnpm dev:backend\" \"pnpm dev\"",
+    "dev:backend:seed": "pnpm --filter @timetrack/backend seed",
+    "build": "pnpm --filter @timetrack/frontend build",
+    "preview": "pnpm --filter @timetrack/frontend preview",
+    "lint": "pnpm -r run lint",
+    "type-check": "pnpm -r run type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css,scss}\"",
+    "clean": "pnpm -r exec rm -rf node_modules dist .turbo"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

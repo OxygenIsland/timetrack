@@ -1,0 +1,8 @@
+# pnpm workspace
+packages:
+  - 'apps/*'
+
+# 全局忽略
+ignored-built-dependencies:
+  - electron
+  - esbuild

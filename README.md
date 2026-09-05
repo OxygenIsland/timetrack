@@ -5,7 +5,7 @@
 ## 📂 仓库结构
 
 ```
-TimeTrack/
+timetrack/
 ├── apps/
 │   └── frontend/              ← 前端（Electron + React）
 ├── docs/                      ← 设计文档

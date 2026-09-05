@@ -71,7 +71,7 @@ npm install -g pnpm
 
 ```bash
 # 在项目根目录
-cd /Users/albert/Documents/TimeTrack
+cd /Users/albert/Documents/timetrack
 
 # 安装所有 workspace 依赖
 pnpm install
