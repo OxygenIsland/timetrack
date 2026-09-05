@@ -1,0 +1,54 @@
+# ===== 依赖 =====
+node_modules/
+.pnpm-store/
+
+# ===== 构建产物 =====
+dist/
+dist-electron/
+build/
+*.tsbuildinfo
+*.exe
+*.dll
+*.so
+*.dylib
+
+# ===== Electron / Vite =====
+.vite/
+*.log
+
+# ===== Python（后端） =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ===== 后端运行数据 =====
+apps/backend/data/
+apps/backend/.env
+
+# ===== 系统文件 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 编辑器 / IDE =====
+.idea/
+.vscode/
+.cursor/
+*.swp
+*.swo
+
+# ===== 环境配置 =====
+.env
+.env.local
+.env.*.local
+!.env.example
