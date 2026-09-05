@@ -2,7 +2,7 @@
  * 主布局（侧边栏 + 顶栏 + 内容区）
  */
 
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Layout, Menu, Typography, Space, Badge } from 'antd';
 import {
   DashboardOutlined,
@@ -34,6 +34,8 @@ interface NavItem {
 }
 
 export function MainLayout() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const collapsed = useGlobalStore((s: GlobalState) => s.sidebarCollapsed);
   const toggleSidebar = useGlobalStore((s: GlobalState) => s.toggleSidebar);
   const wsConnected = useGlobalStore((s: GlobalState) => s.wsConnected);
@@ -72,10 +74,16 @@ export function MainLayout() {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={['/dashboard']}
+          selectedKeys={[
+            navs.find(
+              (nav) =>
+                location.pathname === nav.path ||
+                location.pathname.startsWith(`${nav.path}/`),
+            )?.path ?? '/dashboard',
+          ]}
           items={menuItems}
           onClick={({ key }) => {
-            window.location.href = key;
+            navigate(key);
           }}
         />
       </Sider>
