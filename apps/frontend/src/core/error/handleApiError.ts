@@ -6,6 +6,7 @@
 
 import { message, notification } from 'antd';
 import { ErrorCodes, type ApiError } from './types';
+import { copyTraceId } from '../trace/traceId';
 
 /**
  * 错误级别（用于差异化展示）
@@ -73,6 +74,38 @@ function handleSpecialErrors(error: ApiError): void {
 }
 
 /**
+ * 把 trace_id 渲染到 fatal notification 的 description 里
+ * 做成可点击复制 + 反馈，避免用户手输
+ */
+function buildDescription(error: ApiError): string {
+  const lines: string[] = [];
+  const main = error.suggestion || (error.details?.reason as string);
+  if (main) lines.push(main);
+  if (error.trace_id) {
+    lines.push('');
+    lines.push(`🔖 Trace: ${error.trace_id}`);
+  }
+  return lines.join('\n');
+}
+
+/**
+ * 一键复制 trace_id 的 handler（antd notification 不支持自定义 React 节点时用）
+ * 这里用 description 文本 + 点击事件模拟：
+ * 通过 key 派发到全局事件总线，由 GlobalErrorListener 监听处理。
+ * 简化方案：直接把 trace_id 拼到 description，再用 message 引导用户复制。
+ */
+async function tryCopy(error: ApiError): Promise<void> {
+  if (!error.trace_id) {
+    message.warning('当前错误没有 trace_id');
+    return;
+  }
+  const ok = await copyTraceId(error.trace_id);
+  message[ok ? 'success' : 'error'](
+    ok ? `已复制 Trace ID：${error.trace_id}` : '复制失败，请手动复制',
+  );
+}
+
+/**
  * 统一错误处理入口
  */
 export function handleApiError(error: ApiError, options?: { silent?: boolean }): void {
@@ -100,9 +133,13 @@ export function handleApiError(error: ApiError, options?: { silent?: boolean }):
   if (level === 'fatal') {
     notification.error({
       message: error.message,
-      description: error.suggestion || error.details?.reason as string,
+      description: buildDescription(error),
       duration,
       placement: 'topRight',
+      // 把 trace_id 扔到 onClick，方便通过键盘/鼠标点击复制
+      onClick: () => {
+        tryCopy(error);
+      },
     });
   } else if (level === 'warning') {
     message.warning(error.message, duration);

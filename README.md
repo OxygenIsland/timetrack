@@ -151,7 +151,7 @@ uv run black app scripts        # 代码格式化
 | 前端架构 | ✅ 完成 | 模块注册中心、UI / 业务分离 |
 | 前端核心模块 | ✅ 完成 | Dashboard / Records / WorkHour / Report / System |
 | 后端骨架 | ✅ 完成 | FastAPI + SQLAlchemy + SQLite |
-| 后端 - TraceId 链路 | ✅ 完成 | ContextVar + 中间件 + 日志 patcher（每条日志自动带 trace_id） |
+| 前端 - TraceId 联动 | ✅ 完成 | axios 请求头注入 + 响应头/错误体回填 + 状态栏一键复制 |
 | 后端 - 健康检查 | ✅ 完成 | `/api/v1/health` |
 | 后端 - 人员事件接口 | ✅ 完成 | `/api/v1/personnel/events` |
 | 视频流 | 🟡 待接入 | MediaMTX + WHEP |

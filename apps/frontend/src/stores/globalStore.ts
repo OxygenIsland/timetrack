@@ -14,6 +14,8 @@ export interface GlobalState {
   wsConnected: boolean;
   /** 折叠侧边栏 */
   sidebarCollapsed: boolean;
+  /** 最近一次接口的 trace_id（用于排障时一键复制给后端） */
+  lastTraceId: string;
 
   // Actions
   setUser: (user: IUser | null) => void;
@@ -21,6 +23,7 @@ export interface GlobalState {
   setWsConnected: (connected: boolean) => void;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  setLastTraceId: (traceId: string) => void;
 }
 
 export const useGlobalStore = create<GlobalState>((set) => ({
@@ -28,6 +31,7 @@ export const useGlobalStore = create<GlobalState>((set) => ({
   systemStatus: 'normal',
   wsConnected: false,
   sidebarCollapsed: false,
+  lastTraceId: '',
 
   setUser: (user) => set({ user }),
   setSystemStatus: (systemStatus) => set({ systemStatus }),
@@ -35,4 +39,6 @@ export const useGlobalStore = create<GlobalState>((set) => ({
   toggleSidebar: () =>
     set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
   setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
+  setLastTraceId: (lastTraceId) =>
+    set(typeof lastTraceId === 'string' && lastTraceId ? { lastTraceId } : {}),
 }));

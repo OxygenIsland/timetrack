@@ -3,7 +3,7 @@
  */
 
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Layout, Menu, Typography, Space, Badge } from 'antd';
+import { Layout, Menu, Tooltip, Typography, Space, Badge, message } from 'antd';
 import {
   DashboardOutlined,
   UnorderedListOutlined,
@@ -13,6 +13,7 @@ import {
 } from '@ant-design/icons';
 import { moduleRegistry } from '../../../core/registry/ModuleRegistry';
 import { useGlobalStore, type GlobalState } from '../../../stores/globalStore';
+import { copyTraceId } from '../../../core/trace';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -42,11 +43,21 @@ export function MainLayout() {
   const systemStatus = useGlobalStore((s: GlobalState) => s.systemStatus);
 
   const navs: NavItem[] = moduleRegistry.getAllNavigation();
+  const lastTraceId = useGlobalStore((s: GlobalState) => s.lastTraceId);
   const menuItems = navs.map((nav) => ({
     key: nav.path,
     icon: nav.icon ? ICON_MAP[nav.icon] : undefined,
     label: nav.title,
   }));
+
+  /** 点击 trace 文字：复制到剪贴板 */
+  const handleCopyTrace = async () => {
+    if (!lastTraceId) return;
+    const ok = await copyTraceId(lastTraceId);
+    message[ok ? 'success' : 'error'](
+      ok ? `已复制 Trace ID：${lastTraceId}` : '复制失败，请手动复制',
+    );
+  };
 
   return (
     <Layout style={{ height: '100vh' }}>
@@ -104,6 +115,22 @@ export function MainLayout() {
             </Text>
           </Space>
           <Space size="large">
+            <Tooltip
+              title={lastTraceId ? '点击复制 Trace ID' : '尚无接口请求'}
+              placement="bottom"
+            >
+              <Text
+                type="secondary"
+                style={{
+                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                  cursor: lastTraceId ? 'pointer' : 'default',
+                  userSelect: 'none',
+                }}
+                onClick={handleCopyTrace}
+              >
+                🔖 {lastTraceId || '————————'}
+              </Text>
+            </Tooltip>
             <Space>
               <Badge
                 status={

@@ -3,7 +3,10 @@
  *
  * 职责：
  * - 统一请求/响应拦截
- * - 注入 trace_id
+ * - 注入 trace_id：
+ *    1. 请求拦截器生成 16hex，写入 `X-Trace-Id` 请求头
+ *    2. 响应拦截器从 `X-Trace-Id` 响应头回填（如果业务错误体里有 trace_id 优先用它）
+ *    3. 把最终 trace_id 同步到 globalStore.lastTraceId
  * - 注入 token
  * - 统一错误处理
  * - 与错误码体系集成
@@ -11,10 +14,11 @@
 
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 import { message } from 'antd';
-import { v4 as uuidv4 } from 'uuid';
 import type { IApiClient } from '../registry/types';
 import type { ApiError } from '../error/types';
 import { handleApiError, BizError } from '../error/handleApiError';
+import { generateTraceId, persistTraceId } from '../trace/traceId';
+import { useGlobalStore } from '../../stores/globalStore';
 
 class ApiClient implements IApiClient {
   private instance: AxiosInstance;
@@ -36,19 +40,26 @@ class ApiClient implements IApiClient {
    * 设置拦截器
    */
   private setupInterceptors(): void {
-    // 请求拦截器
+    // 请求拦截器：注入 trace_id / token / 时间戳
     this.instance.interceptors.request.use(
       (config) => {
-        // 注入 trace_id
-        const traceId = (config.headers['X-Trace-Id'] as string) || uuidv4();
+        // 1) 优先使用调用方显式传入的 trace_id（极少用到，留个口子）
+        const explicit =
+          (config.headers['X-Trace-Id'] as string) ||
+          (config.headers['x-trace-id'] as string);
+        const traceId = explicit || generateTraceId();
         config.headers['X-Trace-Id'] = traceId;
 
-        // 注入 token
+        // 2) 在请求阶段就更新一次 store（保证请求刚发出去 UI 也能看到）
+        useGlobalStore.getState().setLastTraceId(traceId);
+        persistTraceId(traceId);
+
+        // 3) 注入 token
         if (this.token) {
           config.headers['Authorization'] = `Bearer ${this.token}`;
         }
 
-        // 注入时间戳
+        // 4) 注入时间戳（后端暂未使用，预留）
         config.headers['X-Request-Time'] = new Date().toISOString();
 
         return config;
@@ -56,10 +67,28 @@ class ApiClient implements IApiClient {
       (error) => Promise.reject(error),
     );
 
-    // 响应拦截器
+    // 响应拦截器：回填 trace_id + 统一错误处理
     this.instance.interceptors.response.use(
-      (response) => response.data,
+      (response) => {
+        // 成功路径：以后端响应头为准（防止上游替换/代理导致 header 缺失，body 里也有 trace_id）
+        const headerTraceId =
+          (response.headers['x-trace-id'] as string | undefined) ||
+          (response.data as any)?.trace_id;
+        if (headerTraceId) {
+          useGlobalStore.getState().setLastTraceId(headerTraceId);
+          persistTraceId(headerTraceId);
+        }
+        return response.data;
+      },
       (error: AxiosError<ApiError>) => {
+        // 错误路径：先从 响应头 / body 拿 trace_id，回填 store
+        const headerTraceId = error.response?.headers?.['x-trace-id'];
+        const bodyTraceId = error.response?.data?.trace_id;
+        const traceId = headerTraceId || bodyTraceId || '';
+        if (traceId) {
+          useGlobalStore.getState().setLastTraceId(traceId);
+          persistTraceId(traceId);
+        }
         return this.handleError(error);
       },
     );
@@ -75,7 +104,7 @@ class ApiClient implements IApiClient {
       throw new BizError(apiError);
     }
 
-    // 网络错误（无响应）
+    // 网络错误（无响应）：仍然保留当前 store 里的 lastTraceId（即本次请求发出去的 id）
     if (error.code === 'ECONNABORTED') {
       message.error('请求超时，请稍后重试');
     } else if (error.message === 'Network Error') {
